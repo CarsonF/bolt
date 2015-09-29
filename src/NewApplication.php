@@ -10,7 +10,7 @@ class NewApplication extends Silex\Application
     {
         parent::__construct($values);
 
-        $services = $services ?: Services::createDefault();
+        $services = $services ?: ServiceBuilder::createDefault();
         $services->commit($this);
     }
 }
