@@ -468,6 +468,9 @@ class Config
         if (!isset($contentType['default_status'])) {
             $contentType['default_status'] = 'draft';
         }
+        if (!isset($contentType['searchable'])) {
+            $contentType['searchable'] = true;
+        }
         if (!isset($contentType['viewless'])) {
             $contentType['viewless'] = false;
         }
@@ -562,11 +565,12 @@ class Config
             // Make sure we have these keys and every field has a group set.
             $field = array_replace(
                 [
-                    'class'   => '',
-                    'default' => '',
-                    'group'   => $currentGroup,
-                    'label'   => '',
-                    'variant' => '',
+                    'class'      => '',
+                    'default'    => '',
+                    'group'      => $currentGroup,
+                    'label'      => '',
+                    'variant'    => '',
+                    'searchable' => true,
                 ],
                 $field
             );
