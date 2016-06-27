@@ -76,6 +76,11 @@ class ControllerServiceProvider implements ServiceProviderInterface, EventSubscr
                 return new Controller\Backend\Users();
             }
         );
+        $app['controller.backend.invitation'] = $app->share(
+            function () {
+                return new Controller\Backend\Invitation();
+            }
+        );
 
         $app['controller.async.general'] = $app->share(
             function () {
@@ -167,6 +172,7 @@ class ControllerServiceProvider implements ServiceProviderInterface, EventSubscr
             'log',
             'records',
             'users',
+            'invitation',
         ];
         foreach ($backendKeys as $controller) {
             $event->mount($prefix, $app['controller.backend.' . $controller]);
