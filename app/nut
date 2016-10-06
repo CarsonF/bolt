@@ -10,9 +10,6 @@ if (version_compare(PHP_VERSION, $minVersion, '<')) {
     exit(1);
 }
 
-/** @var \Silex\Application $app */
-$app = require __DIR__ . '/bootstrap.php';
+require_once dirname(__FILE__) . '/../src/Bootstrap.php';
 
-/** @var \Symfony\Component\Console\Application $nut Nut Console Application */
-$nut = $app['nut'];
-$nut->run();
+Bolt\Bootstrap::nut()->run();
