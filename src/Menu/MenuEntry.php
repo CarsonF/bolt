@@ -209,6 +209,11 @@ class MenuEntry
         return $menu;
     }
 
+    public function up()
+    {
+        return $this->parent ?: $this;
+    }
+
     /**
      * Return a menu entry's named child.
      *
