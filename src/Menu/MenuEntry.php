@@ -191,12 +191,17 @@ class MenuEntry
     /**
      * Add child menu entry.
      *
-     * @param MenuEntry $menu
+     * @param MenuEntry|string $menu
+     * @param string           $path
      *
      * @return MenuEntry
      */
-    public function add(MenuEntry $menu)
+    public function add($menu, $path = '')
     {
+        if (is_string($menu)) {
+            $menu = new MenuEntry($menu, $path);
+        }
+
         $menu->parent = $this;
         $menu->urlGenerator = $this->urlGenerator;
         $this->children[$menu->getName()] = $menu;
