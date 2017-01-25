@@ -152,7 +152,7 @@ class TwigServiceProvider implements ServiceProviderInterface
         // Insert our filesystem loader before native one
         $app['twig.loader'] = $app->share(
             function ($app) {
-                return new \Twig_Loader_Chain(
+                return new Twig\ChainLoader(
                     [
                         $app['twig.loader.array'],
                         $app['twig.loader.bolt_filesystem'],
