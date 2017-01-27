@@ -14,7 +14,7 @@ use Twig_Source as TwigSource;
  *
  * @author Carson Full <carsonfull@gmail.com>
  */
-class FilesystemLoader extends \Twig_Loader_Filesystem
+class FilesystemLoader extends \Twig_Loader_Filesystem implements ListLoaderInterface
 {
     /** @var FilesystemInterface */
     protected $filesystem;
@@ -203,5 +203,39 @@ class FilesystemLoader extends \Twig_Loader_Filesystem
         }
 
         throw new LoaderError($this->errorCache[$name]);
+    }
+
+    /**
+     * @return \Iterator
+     */
+    public function listTemplates()
+    {
+        foreach ($this->paths as $namespace => $dirs) {
+            $namespace = $namespace === static::MAIN_NAMESPACE ? '' : '@' . $namespace . '/';
+
+            foreach ($dirs as $dir) {
+                /** @var DirectoryInterface $dir */
+                $finder = $dir->find()
+                    ->files()
+                    ->depth('<4')
+                    ->name('*.twig')
+                    ->notName('/^_/')
+                    ->notPath('node_modules')
+                    ->notPath('bower_components')
+                ;
+
+                foreach ($finder as $file) {
+                    /** @var FileInterface $file */
+                    $path = $file->getPath();
+                    if ($dir->getPath() !== '' && strpos($path, $dir->getPath()) === 0) {
+                        $path = substr($path, strlen($dir->getPath()) + 1);
+                    }
+
+                    $source = new TwigSource('', $namespace . $path, $file->getFullPath());
+
+                    yield $source;
+                }
+            }
+        }
     }
 }

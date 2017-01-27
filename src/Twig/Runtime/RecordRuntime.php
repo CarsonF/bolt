@@ -4,7 +4,7 @@ namespace Bolt\Twig\Runtime;
 
 use Bolt\Helpers\Excerpt;
 use Bolt\Pager\PagerManager;
-use Symfony\Component\Finder\Finder;
+use Bolt\Twig\ListLoaderInterface;
 use Symfony\Component\Finder\Glob;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -181,31 +181,42 @@ class RecordRuntime
     /**
      * Lists templates, optionally filtered by $filter.
      *
-     * @param string $filter
+     * @param \Twig_Environment $twig
+     * @param string            $filter
      *
      * @return array Sorted and possibly filtered templates
      */
-    public function listTemplates($filter = null)
+    public function listTemplates(\Twig_Environment $twig, $filter = null)
     {
-        $files = [];
-
-        $name = $filter ? Glob::toRegex($filter, false, false) : '/^[a-zA-Z0-9]\V+\.twig$/';
-        $finder = new Finder();
-        $finder->files()
-            ->in($this->templatesPath)
-            ->notName('/^_/')
-            ->notPath('node_modules')
-            ->notPath('bower_components')
-            ->notPath('.sass-cache')
-            ->depth('<4')
-            ->path($name)
-            ->sortByName()
-        ;
-
-        foreach ($finder as $file) {
-            $name = $file->getRelativePathname();
-            $files[$name] = $name;
+        $loader = $twig->getLoader();
+        if (!$loader instanceof ListLoaderInterface) {
+            throw new \RuntimeException(sprintf('Twig Loader must be an instance of %s for "listtemplates" function', ListLoaderInterface::class));
         }
+
+        $files = [];
+        $it = $loader->listTemplates();
+
+        if ($filter !== null) {
+            $filter = Glob::toRegex($filter, false, false);
+        }
+
+        foreach ($it as $source) {
+            $files[$source->getName()] = $source->getPath();
+        }
+
+        uksort($files, function ($a, $b) {
+            if (strpos($a, '@') === 0 && strpos($b, '@') === 0) {
+                return strcmp($a, $b);
+            }
+            if (strpos($a, '@') === 0) {
+                return 1;
+            }
+            if (strpos($b, '@') === 0) {
+                return -1;
+            }
+
+            return strcmp($a, $b);
+        });
 
         // Check: Have we defined names for any of the matched templates?
         foreach ((array) $this->themeTemplateSelect as $templateFile) {

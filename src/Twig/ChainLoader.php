@@ -14,7 +14,7 @@ use Twig_SourceContextLoaderInterface as SourceContextLoaderInterface;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Carson Full <carsonfull@gmail.com>
  */
-class ChainLoader implements LoaderInterface, ExistsLoaderInterface, SourceContextLoaderInterface
+class ChainLoader implements LoaderInterface, ExistsLoaderInterface, SourceContextLoaderInterface, ListLoaderInterface
 {
     /** @var array [string]: bool */
     private $hasSourceCache = [];
@@ -167,5 +167,21 @@ class ChainLoader implements LoaderInterface, ExistsLoaderInterface, SourceConte
         }
 
         throw new LoaderError(sprintf('Template "%s" is not defined%s.', $name, $exceptions ? ' ('.implode(', ', $exceptions).')' : ''));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function listTemplates()
+    {
+        foreach ($this->loaders as $loader) {
+            if (!$loader instanceof ListLoaderInterface) {
+                continue;
+            }
+
+            foreach ($loader->listTemplates() as $source) {
+                yield $source;
+            }
+        }
     }
 }

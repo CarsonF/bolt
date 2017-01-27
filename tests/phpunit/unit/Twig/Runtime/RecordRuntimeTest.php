@@ -372,7 +372,7 @@ GRINGALET;
         $app['config']->set('theme/templateselect', null);
         $handler = $this->getRecordRuntime();
 
-        $result = $handler->listTemplates(null);
+        $result = $handler->listTemplates($app['twig'], null);
         $this->assertArrayHasKey('page.twig', $result);
         $this->assertArrayHasKey('extrafields.twig', $result);
         $this->assertArrayHasKey('index.twig', $result);
@@ -389,7 +389,7 @@ GRINGALET;
         $app['config']->set('theme/templateselect', null);
         $handler = $this->getRecordRuntime();
 
-        $result = $handler->listTemplates('*.twig');
+        $result = $handler->listTemplates($app['twig'], '*.twig');
         $this->assertArrayHasKey('page.twig', $result);
         $this->assertArrayHasKey('extrafields.twig', $result);
         $this->assertArrayHasKey('index.twig', $result);
@@ -406,7 +406,7 @@ GRINGALET;
         $app['config']->set('theme/templateselect', null);
         $handler = $this->getRecordRuntime();
 
-        $result = $handler->listTemplates('s*.twig');
+        $result = $handler->listTemplates($app['twig'], 's*.twig');
         $this->assertArrayHasKey('search.twig', $result);
         $this->assertArrayHasKey('styleguide.twig', $result);
         $this->assertArrayNotHasKey('index.twig', $result);
@@ -429,11 +429,11 @@ GRINGALET;
         ]);
         $handler = $this->getRecordRuntime();
 
-        $result = $handler->listTemplates('*extra*');
+        $result = $handler->listTemplates($app['twig'], '*extra*');
         $this->assertArrayHasKey('extrafields.twig', $result);
         $this->assertContains('Koala', $result);
 
-        $result = $handler->listTemplates('*styleguide*', false);
+        $result = $handler->listTemplates($app['twig'], '*styleguide*');
         $this->assertArrayHasKey('styleguide.twig', $result);
         $this->assertContains('Clippy', $result);
 
