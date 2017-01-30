@@ -15,11 +15,14 @@ class Invitation extends BaseTable
     protected function addColumns()
     {
         // @codingStandardsIgnoreStart
-        $this->table->addColumn('id',         'integer',    ['autoincrement' => true]);
-        $this->table->addColumn('ownerid',    'integer',    ['notnull' => false]);
-        $this->table->addColumn('token',      'string',     ['length' => 128]);
-        $this->table->addColumn('expiration', 'datetime',   ['notnull' => false, 'default' => null]);
-        $this->table->addColumn('roles',      'json_array', []);
+        $this->table->addColumn('token',       'string',     ['length' => 128]);
+        $this->table->addColumn('owner_id',    'integer',    ['notnull' => false]);
+        $this->table->addColumn('expiration',  'datetime',   ['notnull' => false, 'default' => null]);
+        $this->table->addColumn('roles',       'json_array', []);
+
+        $this->table->addColumn('username',    'string',     ['length' => 32]);
+        $this->table->addColumn('email',       'string',     ['length' => 254]);
+        $this->table->addColumn('display_name','string',     ['length' => 32]);
         // @codingStandardsIgnoreEnd
     }
 
@@ -35,6 +38,6 @@ class Invitation extends BaseTable
      */
     protected function setPrimaryKey()
     {
-        $this->table->setPrimaryKey(['id']);
+        $this->table->setPrimaryKey(['token']);
     }
 }

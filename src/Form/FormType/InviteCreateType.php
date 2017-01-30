@@ -2,12 +2,16 @@
 
 namespace Bolt\Form\FormType;
 
+use Bolt\AccessControl\Token\Token;
 use Bolt\Form\FieldType\UserRoleType;
+use Bolt\Security\Random\Generator;
+use Bolt\Storage\Entity\Invitation;
 use Bolt\Translation\Translator as Trans;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -18,6 +22,22 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class InviteCreateType extends AbstractType
 {
+    /** @var SessionInterface */
+    protected $session;
+    /** @var Generator */
+    protected $generator;
+
+    /**
+     * Constructor.
+     *
+     * @param SessionInterface $session
+     */
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+        $this->generator = new Generator();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -72,8 +92,25 @@ class InviteCreateType extends AbstractType
     {
         $resolver->setDefined(['expiryMin', 'expiryMax']);
         $resolver->setDefaults([
-            'expiryMin' => '5 minutes',
-            'expiryMax' => '2 hours',
+            'empty_data' => function () {
+                $invite = new Invitation();
+                $invite->setToken($this->generator->generateString(32));
+                $invite->setOwnerId($this->getUser()->getId());
+
+                return $invite;
+            },
+            'expiryMin' => '30 minutes',
+            'expiryMax' => '48 hours',
         ]);
+    }
+
+    protected function getUser()
+    {
+        $auth = $this->session->get('authentication');
+        if (!$auth instanceof Token) {
+            throw new \RuntimeException('User should be logged in to create an invitation.');
+        }
+
+        return $auth->getUser();
     }
 }

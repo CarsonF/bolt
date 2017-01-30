@@ -8,10 +8,8 @@ use Bolt\Storage\Entity;
 use Bolt\Translation\Translator as Trans;
 use Silex\Application;
 use Silex\ControllerCollection;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Backend controller for invitation code generation.
@@ -26,8 +24,23 @@ class Invitation extends BackendBase
      */
     protected function addRoutes(ControllerCollection $c)
     {
-        $c->match('/users/invite', 'inviteCreate')
-            ->bind('inviteCreate');
+        $c->match('/users/invite/{invite}', 'inviteCreate')
+          ->bind('inviteCreate')
+          ->assert('invite', '\d+')
+          ->value('invite', null)
+            ->convert('invite', function ($id) {
+                if ($id === null) {
+                    return null;
+                }
+
+                return $this->storage()->getRepository(Entity\Invitation::class)->find($id);
+            })
+        ;
+
+        $c->post('/users/delete/{id}', 'inviteDelete')
+          ->bind('inviteDelete')
+          ->assert('id', '\d+')
+        ;
 
         $c->match('/users/invite/share/{code}', 'inviteShare')
             ->assert('code', '.*')
@@ -42,6 +55,41 @@ class Invitation extends BackendBase
     public function before(Request $request, Application $app, $roleRoute = null)
     {
         return parent::before($request, $app, 'useredit:invitation');
+    }
+
+    /**
+     * Invitation link route.
+     *
+     * @param Request $request The Symfony Request
+     *
+     * @return \Bolt\Response\TemplateResponse|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function inviteCreate(Request $request, $invite)
+    {
+        $form = $this->createForm(InviteCreateType::class, $invite)
+                     ->handleRequest($request)
+        ;
+
+        if ($form->isValid()) {
+            /** @var Entity\Invitation $invite */
+            $invite = $form->getData();
+
+            $repo = $this->getRepository(Entity\Invitation::class);
+
+            if ($repo->save($invite)) {
+                $this->flashes()->success(Trans::__('page.invitation.message.code-saved', ['%code%' => $invite->getToken()]));
+            } else {
+                $this->flashes()->error(Trans::__('page.invitation.message.code-failed'));
+            }
+
+            return $this->redirectToRoute('inviteShare', ['code' => $invite->getToken()]);
+        }
+
+        $context = [
+            'form' => $form->createView(),
+        ];
+
+        return $this->render('@bolt/invitation/generate.twig', $context);
     }
 
     /**
@@ -66,7 +114,7 @@ class Invitation extends BackendBase
         if ($form->isValid()) {
             $this->sendInvite($entity);
 
-            return new RedirectResponse($this->generateUrl('users'));
+            return $this->redirectToRoute('users');
         }
 
         // Preparing the forms for the view
@@ -99,15 +147,16 @@ class Invitation extends BackendBase
             'link'    => $entity->link,
         ]);
 
-        $message = $mailer
-            ->createMessage('message')
+        /** @var \Swift_Message $message */
+        $message = $mailer->createMessage('message');
+        $message
             ->setSubject($entity->subject)
             ->setFrom($from)
             ->setReplyTo($from)
             ->setTo($entity->to)
             ->setBody(strip_tags($mailHtml))
-            ->addPart($mailHtml, 'text/html')
         ;
+        $message->addPart($mailHtml, 'text/html');
 
         $failed = true;
         $failedRecipients = [];
@@ -130,53 +179,5 @@ class Invitation extends BackendBase
         } else {
             $this->flashes()->success(Trans::__('page.invitation.share.email-sent', ['%email%' => $entity->to]));
         }
-    }
-
-    /**
-     * Invitation link route.
-     *
-     * @param Request $request The Symfony Request
-     *
-     * @return \Bolt\Response\TemplateResponse|\Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function inviteCreate(Request $request)
-    {
-        $options = [
-            'data_class' => Entity\Invitation::class,
-            'expiryMin'  => '30 minutes', // TODO make configurable
-            'expiryMax'  => '48 hours',
-        ];
-
-        $form = $this->createFormBuilder(InviteCreateType::class, null, $options)
-            ->getForm()
-            ->handleRequest($request)
-        ;
-
-        if ($form->isValid()) {
-            //Generate token for invitation code
-            $random = $this->app['session.generator'];
-            $token = $random->generateId();
-            $owner = $this->getUser();
-
-            $repo = $this->getRepository(Entity\Invitation::class);
-            $inviteEntity = $form->getData();
-            $inviteEntity->setToken($token);
-            $inviteEntity->setOwnerid($owner);
-
-            if ($repo->save($inviteEntity)) {
-                $this->flashes()->success(Trans::__('page.invitation.message.code-saved', ['%code%' => $token]));
-            } else {
-                $this->flashes()->error(Trans::__('page.invitation.message.code-failed'));
-            }
-
-            return new RedirectResponse($this->generateUrl('inviteShare', ['code' => $token]));
-        }
-
-        // Preparing the forms for the view
-        $context = [
-            'form' => $form->createView(),
-        ];
-
-        return $this->render('@bolt/invitation/generate.twig', $context);
     }
 }

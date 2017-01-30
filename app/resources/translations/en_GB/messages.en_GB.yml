@@ -580,7 +580,7 @@ page.edit-users.user-edit: "Edit an existing user account, using the form below.
 page.invitation.button.copy-clipboard: "Copy Link"
 page.invitation.button.generate: "Generate link"
 page.invitation.create-button: "Create User"
-page.invitation.create.title: "Create an account invitation"
+page.invitation.create.title: "Create invitation"
 page.invitation.expiration-date: "Expiry date"
 page.invitation.generate.intro: "Create an invitation link, using the form below. It generates a link to be sent."
 page.invitation.generate.expiry-min: "Expiry date must be a minimum of %PERIOD% from now."
@@ -722,7 +722,7 @@ panel.latest-activity.system: "Latest system activity"
 panel.latest-activity.unknown: "unknown"
 
 panel.user-actions.button.add: "Add a new user"
-panel.user-actions.button.invitation: "Create an invitation link"
+panel.user-actions.button.invitation: "Invite a user"
 
 permissions.roles.description.anonymous: "Built-in role, automatically granted at all times, even if no user is logged in"
 permissions.roles.description.everyone: "Built-in role, automatically granted to every registered user"

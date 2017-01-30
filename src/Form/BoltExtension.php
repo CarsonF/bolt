@@ -30,7 +30,7 @@ class BoltExtension extends AbstractExtension
             new FieldType\UserRoleType($this->app['session'], $this->app['permissions']),
 
             // Form
-            new FormType\InviteCreateType(),
+            new FormType\InviteCreateType($this->app['session']),
             new FormType\UserEditType(),
             new FormType\UserNewType(),
             new FormType\UserProfileType(),

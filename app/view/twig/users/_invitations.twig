@@ -8,6 +8,7 @@
                 <th>Token</th>
                 <th>Expiration</th>
                 <th>Roles</th>
+                <th>Actions</th>
             </tr>
         </thead>
 
@@ -26,6 +27,30 @@
                     </td>
                     <td>
                         {{ invitation.roles|join(', ') }}
+                    </td>
+                    <td class="actions">
+                        <div class="btn-group">
+                            <a href="{{ path('inviteCreate', {'invite': invitation.id}) }}" class="btn btn-default btn-xs">
+                                <i class="fa fa-edit"></i> {{ __('general.phrase.edit') }}
+                            </a>
+
+                            <button type="button" class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
+                                <i class="fa fa-info-sign"></i>
+                                <span class="caret"></span>
+                            </button>
+
+                            <ul class="dropdown-menu pull-right">
+                                <li>
+                                    <form action="{{ path('inviteDelete', {'id': invitation.id}) }}" method="post">
+                                      {{ include('@bolt/_sub/_csrf_token.twig') }}
+                                        <button type="submit" class="btn btn-block btn-link">
+                                            <span class="pull-left">{{ __('general.phrase.delete') }}</span>
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}

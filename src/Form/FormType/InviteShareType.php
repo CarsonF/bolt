@@ -4,11 +4,11 @@ namespace Bolt\Form\FormType;
 
 use Bolt\Translation\Translator as Trans;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -18,6 +18,19 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class InviteShareType extends AbstractType
 {
+    /** @var UrlGeneratorInterface */
+    protected $urlGenerator;
+
+    /**
+     * Constructor.
+     *
+     * @param UrlGeneratorInterface $urlGenerator
+     */
+    public function __construct(UrlGeneratorInterface $urlGenerator = null)
+    {
+        $this->urlGenerator = $urlGenerator;
+    }
+
     /**
      * {@inheritdoc}
      */

@@ -80,4 +80,17 @@ class InvitationRepository extends Repository
 
         return $qb;
     }
+
+    protected function hydrate(array $data, QueryBuilder $qb)
+    {
+        return (new Entity\Invitation())
+            ->setToken($data['token'])
+            ->setOwnerId($data['owner_id'])
+            ->setExpiration($data['expiration'])
+            ->setRoles($data['roles'])
+            ->setUsername($data['username'])
+            ->setDisplayName($data['display_name'])
+            ->setEmail($data['email'])
+        ;
+    }
 }
