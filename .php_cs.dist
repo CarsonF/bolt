@@ -1,0 +1,10 @@
+<?php
+
+/** @var \PhpCsFixer\Config $fixer */
+$fixer = require __DIR__ . '/vendor/bolt/codingstyle/.php_cs.dist';
+
+$fixer->getFinder()
+    ->in('src')
+;
+
+return $fixer;

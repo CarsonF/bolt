@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="Bolt-CodingStyle">
+    <file>src</file>
+
+    <rule ref="vendor/bolt/codingstyle/Bolt"/>
+</ruleset>
